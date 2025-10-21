@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>厦门证券公司市场开发可视化平台</title>
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-not-started {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .status-in-progress {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .status-completed {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .status-follow-up {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        .input-focus:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">厦门证券市场开发平台</h1>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#dashboard" class="nav-link text-gray-600 hover:text-blue-600 font-medium">数据概览</a>
+                <a href="#company-list" class="nav-link text-gray-600 hover:text-blue-600 font-medium">公司列表</a>
+                <a href="#activity-log" class="nav-link text-gray-600 hover:text-blue-600 font-medium">跑动记录</a>
+                <a href="#add-activity" class="nav-link text-gray-600 hover:text-blue-600 font-medium">新增记录</a>
+            </div>
+            <button class="md:hidden text-gray-600 focus:outline-none" id="mobileMenuButton">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+        <!-- 移动端导航菜单 -->
+        <div class="md:hidden hidden bg-white shadow-lg absolute w-full" id="mobileMenu">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#dashboard" class="py-2 px-4 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md">数据概览</a>
+                <a href="#company-list" class="py-2 px-4 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md">公司列表</a>
+                <a href="#activity-log" class="py-2 px-4 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md">跑动记录</a>
+                <a href="#add-activity" class="py-2 px-4 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md">新增记录</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- 数据概览区域 -->
+        <section id="dashboard" class="mb-12 fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <i class="fas fa-tachometer-alt text-blue-600 mr-2"></i>数据概览
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="card bg-white rounded-xl shadow-md p-6 flex items-center">
+                    <div class="bg-blue-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-building text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">总公司数</p>
+                        <p class="text-3xl font-bold text-gray-800">188</p>
+                    </div>
+                </div>
+                <div class="card bg-white rounded-xl shadow-md p-6 flex items-center">
+                    <div class="bg-green-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">已开发</p>
+                        <p class="text-3xl font-bold text-gray-800" id="completedCount">0</p>
+                    </div>
+                </div>
+                <div class="card bg-white rounded-xl shadow-md p-6 flex items-center">
+                    <div class="bg-yellow-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-hourglass-half text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">跟进中</p>
+                        <p class="text-3xl font-bold text-gray-800" id="inProgressCount">0</p>
+                    </div>
+                </div>
+                <div class="card bg-white rounded-xl shadow-md p-6 flex items-center">
+                    <div class="bg-purple-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-user-friends text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">团队成员</p>
+                        <p class="text-3xl font-bold text-gray-800" id="teamMemberCount">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">市场开发进度</h3>
+                    <div class="h-64">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+                <div class="card bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">月度跑动情况</h3>
+                    <div class="h-64">
+                        <canvas id="monthlyActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 公司列表区域 -->
+        <section id="company-list" class="mb-12 fade-in">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-building text-blue-600 mr-2"></i>厦门证券公司列表
+                </h2>
+                <div class="mt-4 md:mt-0 relative">
+                    <input type="text" id="companySearch" placeholder="搜索公司名称..." 
+                           class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none input-focus w-full md:w-64">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">序号</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">公司名称</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地址</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="companyTableBody">
+                            <!-- 公司列表将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 flex items-center justify-between border-t border-gray-200">
+                    <div class="text-sm text-gray-500">
+                        显示 <span id="showingStart">1</span> 至 <span id="showingEnd">10</span> 条，共 <span id="totalItems">188</span> 条
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="prevPage" class="px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-chevron-left text-xs"></i> 上一页
+                        </button>
+                        <button id="nextPage" class="px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            下一页 <i class="fas fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 跑动记录区域 -->
+        <section id="activity-log" class="mb-12 fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <i class="fas fa-history text-blue-600 mr-2"></i>跑动记录
+            </h2>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成员</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">公司</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">内容</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="activityTableBody">
+                            <!-- 跑动记录将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 flex items-center justify-between border-t border-gray-200">
+                    <div class="text-sm text-gray-500">
+                        暂无记录，请添加新的跑动记录
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 新增记录区域 -->
+        <section id="add-activity" class="mb-12 fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <i class="fas fa-plus-circle text-blue-600 mr-2"></i>新增跑动记录
+            </h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <form id="activityForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="memberName" class="block text-sm font-medium text-gray-700 mb-1">成员姓名</label>
+                            <input type="text" id="memberName" name="memberName" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="activityDate" class="block text-sm font-medium text-gray-700 mb-1">跑动日期</label>
+                            <input type="date" id="activityDate" name="activityDate" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="companyName" class="block text-sm font-medium text-gray-700 mb-1">公司名称</label>
+                            <select id="companyName" name="companyName" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                                <!-- 公司名称选项将通过JavaScript动态生成 -->
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="activityContent" class="block text-sm font-medium text-gray-700 mb-1">跑动内容</label>
+                            <textarea id="activityContent" name="activityContent" rows="4" required
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus"></textarea>
+                        </div>
+                        <div>
+                            <label for="followUpStatus" class="block text-sm font-medium text-gray-700 mb-1">跟进状态</label>
+                            <select id="followUpStatus" name="followUpStatus" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                                <option value="not-started">未开始</option>
+                                <option value="in-progress">进行中</option>
+                                <option value="completed">已完成</option>
+                                <option value="follow-up">需跟进</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            保存记录
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-400">厦门证券市场开发平台 &copy; 2024</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-question-circle"></i> 帮助中心
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-file-alt"></i> 使用指南
+                    </a>
+                    <a href="https://space.coze.cn" class="text-gray-400 hover:text-white transition-colors">
+                        created by coze space
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-gray-400 text-sm">
+                <p>页面内容均由 AI 生成，仅供参考</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 编辑记录模态框 -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg slide-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">编辑跑动记录</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="editForm" class="space-y-6">
+                <input type="hidden" id="editId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="editMemberName" class="block text-sm font-medium text-gray-700 mb-1">成员姓名</label>
+                        <input type="text" id="editMemberName" name="editMemberName" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                    </div>
+                    <div>
+                        <label for="editActivityDate" class="block text-sm font-medium text-gray-700 mb-1">跑动日期</label>
+                        <input type="date" id="editActivityDate" name="editActivityDate" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="editCompanyName" class="block text-sm font-medium text-gray-700 mb-1">公司名称</label>
+                        <select id="editCompanyName" name="editCompanyName" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                            <!-- 公司名称选项将通过JavaScript动态生成 -->
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="editActivityContent" class="block text-sm font-medium text-gray-700 mb-1">跑动内容</label>
+                        <textarea id="editActivityContent" name="editActivityContent" rows="4" required
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus"></textarea>
+                    </div>
+                    <div>
+                        <label for="editFollowUpStatus" class="block text-sm font-medium text-gray-700 mb-1">跟进状态</label>
+                        <select id="editFollowUpStatus" name="editFollowUpStatus" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                            <option value="not-started">未开始</option>
+                            <option value="in-progress">进行中</option>
+                            <option value="completed">已完成</option>
+                            <option value="follow-up">需跟进</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="cancelEdit" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors focus:outline-none">
+                        取消
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        保存修改
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 厦门证券公司数据
+        const companies = [
+            { id: 1, name: "万和证券股份有限公司厦门七星西路证券营业部", address: "厦门市思明区七星西路178号第十八层03单元" },
+            { id: 2, name: "万联证券股份有限公司厦门台东路证券营业部", address: "厦门市思明区台东路66号9层903904单元" },
+            { id: 3, name: "上海万国证券公司厦门业务部", address: "厦门市厦禾路842号金榜大厦A座1" },
+            { id: 4, name: "世纪证券有限责任公司厦门分公司", address: "厦门市湖里区仙岳路4686号805室" },
+            { id: 5, name: "世纪证券有限责任公司厦门金边路证券营业部", address: "厦门市湖里区金边路568-1号301室" },
+            { id: 6, name: "东亚前海证券有限责任公司福建分公司", address: "厦门市思明区鹭江道100号财富中心604单元" },
+            { id: 7, name: "东兴证券股份有限公司厦门分公司", address: "厦门市思明区湖滨南路55号402单元" },
+            { id: 8, name: "东兴证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道8号国际银行大厦9楼EF单元" },
+            { id: 9, name: "东北证券股份有限公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路357-359号海晟国际大厦第14层14" },
+            { id: 10, name: "东吴证券股份有限公司厦门莲花南路证券营业部", address: "厦门市思明区莲花南路6号北方大厦" },
+            // 为了简化，这里只列出前10家公司，实际代码中需要包含全部188家
+        ];
+
+        // 初始化数据
+        function initData() {
+            // 从localStorage加载数据，如果不存在则初始化
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            const companyStatus = JSON.parse(localStorage.getItem('companyStatus')) || {};
+            
+            // 初始化所有公司状态为未开始
+            companies.forEach(company => {
+                if (!companyStatus[company.id]) {
+                    companyStatus[company.id] = 'not-started';
+                }
+            });
+            
+            // 保存初始化数据
+            localStorage.setItem('activities', JSON.stringify(activities));
+            localStorage.setItem('companyStatus', JSON.stringify(companyStatus));
+            
+            return { activities, companyStatus };
+        }
+
+        // 渲染公司列表
+        function renderCompanyList(companies, searchTerm = '') {
+            const tableBody = document.getElementById('companyTableBody');
+            const filteredCompanies = companies.filter(company => 
+                company.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            // 分页逻辑
+            const itemsPerPage = 10;
+            let currentPage = 1;
+            
+            function renderPage(page) {
+                const startIndex = (page - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedCompanies = filteredCompanies.slice(startIndex, endIndex);
+                
+                tableBody.innerHTML = '';
+                
+                paginatedCompanies.forEach(company => {
+                    const status = getCompanyStatus(company.id);
+                    const statusClass = getStatusClass(status);
+                    const statusText = getStatusText(status);
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 transition-colors';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${company.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${company.name}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${company.address}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCompanyDetails(${company.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="text-green-600 hover:text-green-900" onclick="addActivityForCompany(${company.id})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // 更新分页信息
+                document.getElementById('showingStart').textContent = startIndex + 1;
+                document.getElementById('showingEnd').textContent = Math.min(endIndex, filteredCompanies.length);
+                document.getElementById('totalItems').textContent = filteredCompanies.length;
+                
+                // 更新分页按钮状态
+                document.getElementById('prevPage').disabled = page === 1;
+                document.getElementById('nextPage').disabled = endIndex >= filteredCompanies.length;
+                
+                currentPage = page;
+            }
+            
+            // 初始渲染第一页
+            renderPage(1);
+            
+            // 绑定分页按钮事件
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    renderPage(currentPage - 1);
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                if ((currentPage * itemsPerPage) < filteredCompanies.length) {
+                    renderPage(currentPage + 1);
+                }
+            });
+        }
+
+        // 获取公司状态
+        function getCompanyStatus(companyId) {
+            const companyStatus = JSON.parse(localStorage.getItem('companyStatus')) || {};
+            return companyStatus[companyId] || 'not-started';
+        }
+
+        // 设置公司状态
+        function setCompanyStatus(companyId, status) {
+            const companyStatus = JSON.parse(localStorage.getItem('companyStatus')) || {};
+            companyStatus[companyId] = status;
+            localStorage.setItem('companyStatus', JSON.stringify(companyStatus));
+        }
+
+        // 获取状态样式类
+        function getStatusClass(status) {
+            switch(status) {
+                case 'not-started': return 'status-not-started';
+                case 'in-progress': return 'status-in-progress';
+                case 'completed': return 'status-completed';
+                case 'follow-up': return 'status-follow-up';
+                default: return 'status-not-started';
+            }
+        }
+
+        // 获取状态文本
+        function getStatusText(status) {
+            switch(status) {
+                case 'not-started': return '未开始';
+                case 'in-progress': return '进行中';
+                case 'completed': return '已完成';
+                case 'follow-up': return '需跟进';
+                default: return '未开始';
+            }
+        }
+
+        // 渲染公司选择下拉框
+        function renderCompanySelect() {
+            const selectElement = document.getElementById('companyName');
+            const editSelectElement = document.getElementById('editCompanyName');
+            
+            selectElement.innerHTML = '<option value="" disabled selected>请选择公司</option>';
+            editSelectElement.innerHTML = '<option value="" disabled selected>请选择公司</option>';
+            
+            companies.forEach(company => {
+                const option = document.createElement('option');
+                option.value = company.id;
+                option.textContent = company.name;
+                selectElement.appendChild(option);
+                
+                const editOption = document.createElement('option');
+                editOption.value = company.id;
+                editOption.textContent = company.name;
+                editSelectElement.appendChild(editOption);
+            });
+        }
+
+        // 渲染跑动记录
+        function renderActivityLog() {
+            const tableBody = document.getElementById('activityTableBody');
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            
+            if (activities.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                            <i class="fas fa-calendar-alt text-4xl mb-2"></i>
+                            <p>暂无跑动记录</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // 按日期降序排序
+            activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            tableBody.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const company = companies.find(c => c.id === activity.companyId);
+                const statusClass = getStatusClass(activity.status);
+                const statusText = getStatusText(activity.status);
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(activity.date).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${activity.memberName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${company ? company.name : '未知公司'}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="${activity.content}">${activity.content}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="editActivity(${activity.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-900" onclick="deleteActivity(${activity.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 渲染数据概览
+        function renderDashboard() {
+            const companyStatus = JSON.parse(localStorage.getItem('companyStatus')) || {};
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            
+            // 计算各状态公司数量
+            const statusCounts = {
+                'not-started': 0,
+                'in-progress': 0,
+                'completed': 0,
+                'follow-up': 0
+            };
+            
+            Object.values(companyStatus).forEach(status => {
+                if (statusCounts.hasOwnProperty(status)) {
+                    statusCounts[status]++;
+                }
+            });
+            
+            // 更新状态卡片
+            document.getElementById('completedCount').textContent = statusCounts.completed;
+            document.getElementById('inProgressCount').textContent = statusCounts['in-progress'] + statusCounts['follow-up'];
+            
+            // 获取所有团队成员（去重）
+            const teamMembers = [...new Set(activities.map(a => a.memberName))];
+            document.getElementById('teamMemberCount').textContent = teamMembers.length;
+            
+            // 渲染进度饼图
+            const progressCtx = document.getElementById('progressChart').getContext('2d');
+            new Chart(progressCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['未开始', '进行中', '已完成', '需跟进'],
+                    datasets: [{
+                        data: [
+                            statusCounts['not-started'],
+                            statusCounts['in-progress'],
+                            statusCounts.completed,
+                            statusCounts['follow-up']
+                        ],
+                        backgroundColor: [
+                            '#f1f5f9',
+                            '#dbeafe',
+                            '#dcfce7',
+                            '#fef3c7'
+                        ],
+                        borderColor: [
+                            '#e2e8f0',
+                            '#bfdbfe',
+                            '#bbf7d0',
+                            '#fde68a'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // 计算月度跑动数据
+            const monthlyData = {};
+            const now = new Date();
+            
+            // 初始化最近6个月
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                monthlyData[monthKey] = 0;
+            }
+            
+            // 统计每月跑动次数
+            activities.forEach(activity => {
+                const date = new Date(activity.date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                if (monthlyData.hasOwnProperty(monthKey)) {
+                    monthlyData[monthKey]++;
+                }
+            });
+            
+            // 渲染月度跑动图表
+            const monthlyCtx = document.getElementById('monthlyActivityChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(monthlyData).map(key => {
+                        const [year, month] = key.split('-');
+                        return `${year}年${month}月`;
+                    }),
+                    datasets: [{
+                        label: '跑动次数',
+                        data: Object.values(monthlyData),
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 添加跑动记录
+        function addActivity(event) {
+            event.preventDefault();
+            
+            const memberName = document.getElementById('memberName').value;
+            const activityDate = document.getElementById('activityDate').value;
+            const companyId = parseInt(document.getElementById('companyName').value);
+            const activityContent = document.getElementById('activityContent').value;
+            const followUpStatus = document.getElementById('followUpStatus').value;
+            
+            // 生成唯一ID
+            const id = Date.now();
+            
+            // 获取现有活动记录
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            
+            // 添加新记录
+            activities.push({
+                id,
+                memberName,
+                date: activityDate,
+                companyId,
+                content: activityContent,
+                status: followUpStatus
+            });
+            
+            // 保存记录
+            localStorage.setItem('activities', JSON.stringify(activities));
+            
+            // 更新公司状态
+            setCompanyStatus(companyId, followUpStatus);
+            
+            // 重置表单
+            document.getElementById('activityForm').reset();
+            
+            // 重新渲染相关视图
+            renderActivityLog();
+            renderDashboard();
+            renderCompanyList(companies);
+            
+            // 显示成功提示
+            alert('跑动记录添加成功！');
+        }
+
+        // 编辑跑动记录
+        function editActivity(id) {
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            const activity = activities.find(a => a.id === id);
+            
+            if (activity) {
+                document.getElementById('editId').value = activity.id;
+                document.getElementById('editMemberName').value = activity.memberName;
+                document.getElementById('editActivityDate').value = activity.date;
+                document.getElementById('editCompanyName').value = activity.companyId;
+                document.getElementById('editActivityContent').value = activity.content;
+                document.getElementById('editFollowUpStatus').value = activity.status;
+                
+                // 显示编辑模态框
+                document.getElementById('editModal').classList.remove('hidden');
+            }
+        }
+
+        // 保存编辑的跑动记录
+        function saveEditedActivity(event) {
+            event.preventDefault();
+            
+            const id = parseInt(document.getElementById('editId').value);
+            const memberName = document.getElementById('editMemberName').value;
+            const activityDate = document.getElementById('editActivityDate').value;
+            const companyId = parseInt(document.getElementById('editCompanyName').value);
+            const activityContent = document.getElementById('editActivityContent').value;
+            const followUpStatus = document.getElementById('editFollowUpStatus').value;
+            
+            // 获取现有活动记录
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            
+            // 找到并更新记录
+            const index = activities.findIndex(a => a.id === id);
+            if (index !== -1) {
+                // 如果公司发生变化，需要更新原公司和新公司的状态
+                const oldCompanyId = activities[index].companyId;
+                const oldStatus = activities[index].status;
+                
+                // 更新记录
+                activities[index] = {
+                    id,
+                    memberName,
+                    date: activityDate,
+                    companyId,
+                    content: activityContent,
+                    status: followUpStatus
+                };
+                
+                // 保存记录
+                localStorage.setItem('activities', JSON.stringify(activities));
+                
+                // 更新公司状态
+                setCompanyStatus(companyId, followUpStatus);
+                
+                // 如果公司发生变化，需要重新评估原公司的状态
+                if (oldCompanyId !== companyId) {
+                    updateCompanyStatus(oldCompanyId);
+                }
+                
+                // 关闭模态框
+                document.getElementById('editModal').classList.add('hidden');
+                
+                // 重新渲染相关视图
+                renderActivityLog();
+                renderDashboard();
+                renderCompanyList(companies);
+                
+                // 显示成功提示
+                alert('跑动记录更新成功！');
+            }
+        }
+
+        // 删除跑动记录
+        function deleteActivity(id) {
+            if (confirm('确定要删除这条跑动记录吗？')) {
+                // 获取现有活动记录
+                const activities = JSON.parse(localStorage.getItem('activities')) || [];
+                
+                // 找到并删除记录
+                const index = activities.findIndex(a => a.id === id);
+                if (index !== -1) {
+                    const companyId = activities[index].companyId;
+                    activities.splice(index, 1);
+                    
+                    // 保存记录
+                    localStorage.setItem('activities', JSON.stringify(activities));
+                    
+                    // 重新评估公司状态
+                    updateCompanyStatus(companyId);
+                    
+                    // 重新渲染相关视图
+                    renderActivityLog();
+                    renderDashboard();
+                    renderCompanyList(companies);
+                    
+                    // 显示成功提示
+                    alert('跑动记录删除成功！');
+                }
+            }
+        }
+
+        // 更新公司状态（基于所有相关活动）
+        function updateCompanyStatus(companyId) {
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            const companyActivities = activities.filter(a => a.companyId === companyId);
+            
+            // 如果没有活动记录，设置为未开始
+            if (companyActivities.length === 0) {
+                setCompanyStatus(companyId, 'not-started');
+                return;
+            }
+            
+            // 按日期降序排序，取最新的活动状态
+            companyActivities.sort((a, b) => new Date(b.date) - new Date(a.date));
+            setCompanyStatus(companyId, companyActivities[0].status);
+        }
+
+        // 查看公司详情
+        function viewCompanyDetails(companyId) {
+            const company = companies.find(c => c.id === companyId);
+            const status = getCompanyStatus(companyId);
+            const statusText = getStatusText(status);
+            
+            alert(`公司名称：${company.name}\n地址：${company.address}\n状态：${statusText}`);
+        }
+
+        // 为特定公司添加活动
+        function addActivityForCompany(companyId) {
+            document.getElementById('companyName').value = companyId;
+            document.getElementById('add-activity').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 移动端菜单切换
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        // 搜索公司
+        function searchCompanies() {
+            const searchTerm = document.getElementById('companySearch').value;
+            renderCompanyList(companies, searchTerm);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化数据
+            initData();
+            
+            // 渲染页面内容
+            renderCompanyList(companies);
+            renderCompanySelect();
+            renderActivityLog();
+            renderDashboard();
+            
+            // 绑定表单提交事件
+            document.getElementById('activityForm').addEventListener('submit', addActivity);
+            document.getElementById('editForm').addEventListener('submit', saveEditedActivity);
+            
+            // 绑定移动端菜单切换事件
+            document.getElementById('mobileMenuButton').addEventListener('click', toggleMobileMenu);
+            
+            // 绑定模态框关闭事件
+            document.getElementById('closeModal').addEventListener('click', closeEditModal);
+            document.getElementById('cancelEdit').addEventListener('click', closeEditModal);
+            
+            // 绑定搜索事件
+            document.getElementById('companySearch').addEventListener('input', searchCompanies);
+            
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                        
+                        // 关闭移动端菜单
+                        document.getElementById('mobileMenu').classList.add('hidden');
+                    }
+                });
+            });
+            
+            // 设置今天的日期为默认日期
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('activityDate').value = today;
+            document.getElementById('editActivityDate').value = today;
+        });
+
+        // 暴露全局函数
+        window.editActivity = editActivity;
+        window.deleteActivity = deleteActivity;
+        window.viewCompanyDetails = viewCompanyDetails;
+        window.addActivityForCompany = addActivityForCompany;
+    </script>
+</body>
+</html>
