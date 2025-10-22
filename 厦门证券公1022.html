@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>厦门证券公司完整名单</title>
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-not-started {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .status-in-progress {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .status-completed {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .status-follow-up {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        .input-focus:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .table-container {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-building text-blue-600 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">厦门证券公司完整名单</h1>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#company-list" class="nav-link text-blue-600 font-medium active">公司列表</a>
+                <a href="#add-activity" class="nav-link text-gray-600 hover:text-blue-600 font-medium">新增记录</a>
+            </div>
+            <button class="md:hidden text-gray-600 focus:outline-none" id="mobileMenuButton">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+        <!-- 移动端导航菜单 -->
+        <div class="md:hidden hidden bg-white shadow-lg absolute w-full" id="mobileMenu">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#company-list" class="py-2 px-4 text-blue-600 bg-blue-50 rounded-md">公司列表</a>
+                <a href="#add-activity" class="py-2 px-4 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md">新增记录</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- 数据概览区域 -->
+        <section id="dashboard" class="mb-12 fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <i class="fas fa-tachometer-alt text-blue-600 mr-2"></i>数据概览
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="card bg-white rounded-xl shadow-md p-6 flex items-center">
+                    <div class="bg-blue-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-building text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">总公司数</p>
+                        <p class="text-3xl font-bold text-gray-800">188</p>
+                    </div>
+                </div>
+                <div class="card bg-white rounded-xl shadow-md p-6 flex items-center">
+                    <div class="bg-green-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">已开发</p>
+                        <p class="text-3xl font-bold text-gray-800" id="completedCount">0</p>
+                    </div>
+                </div>
+                <div class="card bg-white rounded-xl shadow-md p-6 flex items-center">
+                    <div class="bg-yellow-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-hourglass-half text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">跟进中</p>
+                        <p class="text-3xl font-bold text-gray-800" id="inProgressCount">0</p>
+                    </div>
+                </div>
+                <div class="card bg-white rounded-xl shadow-md p-6 flex items-center">
+                    <div class="bg-purple-100 rounded-full p-3 mr-4">
+                        <i class="fas fa-user-friends text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">团队成员</p>
+                        <p class="text-3xl font-bold text-gray-800" id="teamMemberCount">0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 公司列表区域 -->
+        <section id="company-list" class="mb-12 fade-in">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-building text-blue-600 mr-2"></i>厦门证券公司完整名单
+                </h2>
+                <div class="mt-4 md:mt-0 relative">
+                    <input type="text" id="companySearch" placeholder="搜索公司名称..." 
+                           class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none input-focus w-full md:w-64">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="table-wrapper">
+                    <div class="table-container">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 sticky top-0 z-10">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">序号</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">公司名称</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地址</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="companyTableBody">
+                                <!-- 公司列表将通过JavaScript动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 新增记录区域 -->
+        <section id="add-activity" class="mb-12 fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <i class="fas fa-plus-circle text-blue-600 mr-2"></i>新增跑动记录
+            </h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <form id="activityForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="memberName" class="block text-sm font-medium text-gray-700 mb-1">成员姓名</label>
+                            <input type="text" id="memberName" name="memberName" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="activityDate" class="block text-sm font-medium text-gray-700 mb-1">跑动日期</label>
+                            <input type="date" id="activityDate" name="activityDate" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="companyName" class="block text-sm font-medium text-gray-700 mb-1">公司名称</label>
+                            <select id="companyName" name="companyName" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                                <option value="" disabled selected>请选择公司</option>
+                                <!-- 公司名称选项将通过JavaScript动态生成 -->
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="activityContent" class="block text-sm font-medium text-gray-700 mb-1">跑动内容</label>
+                            <textarea id="activityContent" name="activityContent" rows="4" required
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus"></textarea>
+                        </div>
+                        <div>
+                            <label for="followUpStatus" class="block text-sm font-medium text-gray-700 mb-1">跟进状态</label>
+                            <select id="followUpStatus" name="followUpStatus" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none input-focus">
+                                <option value="not-started">未开始</option>
+                                <option value="in-progress">进行中</option>
+                                <option value="completed">已完成</option>
+                                <option value="follow-up">需跟进</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            保存记录
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-400">厦门证券公司名单 &copy; 2024</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-question-circle"></i> 帮助中心
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-file-alt"></i> 使用指南
+                    </a>
+                    <a href="https://space.coze.cn" class="text-gray-400 hover:text-white transition-colors">
+                        created by coze space
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-gray-400 text-sm">
+                <p>页面内容均由 AI 生成，仅供参考</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 厦门证券公司数据 - 完整188家公司
+        const companies = [
+            { id: 1, name: "万和证券股份有限公司厦门七星西路证券营业部", address: "厦门市思明区七星西路178号第十八层03单元" },
+            { id: 2, name: "万联证券股份有限公司厦门台东路证券营业部", address: "厦门市思明区台东路66号9层903904单元" },
+            { id: 3, name: "上海万国证券公司厦门业务部", address: "厦门市厦禾路842号金榜大厦A座1" },
+            { id: 4, name: "世纪证券有限责任公司厦门分公司", address: "厦门市湖里区仙岳路4686号805室" },
+            { id: 5, name: "世纪证券有限责任公司厦门金边路证券营业部", address: "厦门市湖里区金边路568-1号301室" },
+            { id: 6, name: "东亚前海证券有限责任公司福建分公司", address: "厦门市思明区鹭江道100号财富中心604单元" },
+            { id: 7, name: "东兴证券股份有限公司厦门分公司", address: "厦门市思明区湖滨南路55号402单元" },
+            { id: 8, name: "东兴证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道8号国际银行大厦9楼EF单元" },
+            { id: 9, name: "东北证券股份有限公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路357-359号海晟国际大厦第14层14" },
+            { id: 10, name: "东吴证券股份有限公司厦门莲花南路证券营业部", address: "厦门市思明区莲花南路6号北方大厦" },
+            { id: 11, name: "东方证券股份有限公司厦门仙岳路证券营业部", address: "厦门市思明区仙岳路555号105-106单元" },
+            { id: 12, name: "东方证券股份有限公司福建分公司", address: "厦门市湖里区金钟路134号1911室" },
+            { id: 13, name: "东方财富证券股份有限公司厦门后滨路证券营业部", address: "厦门市思明区后滨路6号157单元" },
+            { id: 14, name: "东方财富证券股份有限公司厦门展鸿路证券营业部", address: "厦门市思明区展鸿路82号25层05单元" },
+            { id: 15, name: "东海证券股份有限公司厦门嘉禾路证券营业部", address: "厦门市湖里区嘉禾路398-102号" },
+            { id: 16, name: "东海证券股份有限公司福建厦门分公司", address: "厦门市思明区厦禾路13号113单元" },
+            { id: 17, name: "东莞证券股份有限公司厦门分公司", address: "厦门市湖里区安岭路990992号1002之二单元" },
+            { id: 18, name: "中信建投证券股份有限公司厦门分公司", address: "厦门市思明区民族路50号厦门世纪中心8层010203单元" },
+            { id: 19, name: "中信建投证券股份有限公司厦门杏东路证券营业部", address: "厦门市集美区杏东路69号明珠海湾大酒店一二楼东" },
+            { id: 20, name: "中信建投证券股份有限公司厦门环城西路证券营业部", address: "厦门市同安区环城西路749号环城西路747号第3层环" },
+            { id: 21, name: "中信建投证券股份有限公司厦门观日路证券营业部", address: "厦门市思明区观日路1号佰翔商业广场107108207单元" },
+            { id: 22, name: "中信证券华南股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道100号怡山商业中心厦门财富中心01层03" },
+            { id: 23, name: "中信证券股份有限公司厦门分公司", address: "厦门市思明区湖滨东路93号华润大厦A座第16层040506单" },
+            { id: 24, name: "中信证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道8号国际银行大厦32层CDEF单元" },
+            { id: 25, name: "中国中金财富证券有限公司厦门分公司", address: "厦门市思明区湖滨东路93号华润大厦A座3001-13001-" },
+            { id: 26, name: "中国中金财富证券有限公司厦门湖滨东路证券营业部", address: "厦门市思明区湖滨东路93号厦门华润大厦A座3301单元" },
+            { id: 27, name: "中国信达信托投资公司厦门嘉禾路证券交易营业部", address: "厦门市嘉禾路108号" },
+            { id: 28, name: "中国信达信托投资公司厦门证券交易营业部", address: "厦门市美仁新村18号" },
+            { id: 29, name: "中国华融信托投资公司厦门证券交易营业部", address: "厦门市虎园路6号之四" },
+            { id: 30, name: "中国科技国际信托投资公司厦门证券交易营业部", address: "厦门市湖滨南路285-289号" },
+            { id: 31, name: "中国科技国际信托投资有限责任公司厦门证券营业部", address: "厦门市湖滨北路振业大厦裙楼二层" },
+            { id: 32, name: "中国科技证券有限责任公司厦门湖滨北路证券营业部", address: "厦门市开元区湖滨北路振业大厦裙楼二层" },
+            { id: 33, name: "中国银河证券有限责任公司厦门嘉禾路证券营业部", address: "厦门市嘉禾路108号香江花园商场331-334号" },
+            { id: 34, name: "中国银河证券有限责任公司厦门美湖路证券营业部", address: "厦门市美湖路75-87号" },
+            { id: 35, name: "中国银河证券有限责任公司厦门虎园路证券营业部", address: "厦门市虎园路6号之四" },
+            { id: 36, name: "中国银河证券股份有限公司厦门分公司", address: "厦门市思明区展鸿路81号特房波特曼财富中心A座15层CD单元" },
+            { id: 37, name: "中国银河证券股份有限公司厦门嘉禾路证券营业部", address: "厦门市思明区嘉禾路25号新景中心C座五" },
+            { id: 38, name: "中国银河证券股份有限公司厦门塔埔东路证券营业部", address: "厦门市思明区塔埔东路165号101单元" },
+            { id: 39, name: "中国银河证券股份有限公司厦门民族路证券营业部", address: "厦门市思明区民族路50号世纪中心1701-1703单元" },
+            { id: 40, name: "中国银河证券股份有限公司厦门湖滨东路证券营业部", address: "厦门市思明区湖滨东路93号1905-1室" },
+            { id: 41, name: "中国银河证券股份有限公司厦门湖滨中路证券营业部", address: "厦门市思明区湖滨中路123号夏商大厦160116041605" },
+            { id: 42, name: "中国银河证券股份有限公司厦门滨海西大道证券营业部", address: "厦门市同安区滨海西大道6788-1号104室" },
+            { id: 43, name: "中国银河证券股份有限公司厦门自贸金融中心证券营业部", address: "厦门片区保税区屿南四路3号自贸金融中心C栋1层05-06单元" },
+            { id: 44, name: "中天证券股份有限公司厦门深田路证券营业部", address: "厦门市思明区深田路46号深田国际大厦1302室" },
+            { id: 45, name: "中天证券股份有限公司厦门穆厝路证券营业部", address: "厦门市湖里区穆厝路5号大唐五缘YOHO B栋101室" },
+            { id: 46, name: "中山证券有限责任公司厦门分公司", address: "厦门市思明区台南路73号福兴国际中心1楼" },
+            { id: 47, name: "中山证券有限责任公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路90号立信广场" },
+            { id: 48, name: "中泰证券股份有限公司厦门七星西路证券营业部", address: "厦门市思明区七星西路1号第22层" },
+            { id: 49, name: "中泰证券股份有限公司厦门厦禾路证券营业部", address: "厦门市思明区厦禾路837号第二层1" },
+            { id: 50, name: "中泰证券股份有限公司厦门嘉禾路证券营业部", address: "厦门市思明区嘉禾路21号新景中心A栋A1208室" },
+            { id: 51, name: "中泰证券股份有限公司厦门城南路证券营业部", address: "厦门市同安区同集北路建发大厦六层" },
+            { id: 52, name: "中泰证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道2号1006室1" },
+            { id: 53, name: "中泰证券股份有限公司福建分公司", address: "厦门市思明区民族路50号10楼04-06单元" },
+            { id: 54, name: "中航证券有限公司厦门环岛东路证券营业部", address: "厦门市思明区环岛东路1801号中航紫金广场A栋31层01单元" },
+            { id: 55, name: "中邮证券有限责任公司厦门仙岳路证券营业部", address: "厦门市思明区仙岳路458号地上1层营" },
+            { id: 56, name: "中银国际证券股份有限公司厦门湖滨北路证券营业部", address: "厦门市思明区湖滨北路40号中银大厦附楼第二层B" },
+            { id: 57, name: "信达证券股份有限公司厦门分公司", address: "厦门市思明区湖滨南路357-359号海晟国际大厦第11层11" },
+            { id: 58, name: "信达证券股份有限公司厦门高林中路证券营业部", address: "厦门市湖里区高林中路469号2101室" },
+            { id: 59, name: "光大证券股份有限公司厦门展鸿路金融中心大厦证券营业部", address: "厦门市思明区展鸿路82号34层010203A单元" },
+            { id: 60, name: "光大证券股份有限公司厦门湖滨东路证券营业部", address: "厦门市思明区湖滨东路93号华润大厦A座29层01单元" },
+            { id: 61, name: "光大证券股份有限公司福建分公司", address: "厦门市思明区展鸿路82号34层03B04A单元" },
+            { id: 62, name: "兴业证券股份有限公司厦门分公司", address: "厦门市思明区展鸿路82号厦门国际金融中心23楼01-04单元" },
+            { id: 63, name: "兴业证券股份有限公司厦门吕岭路证券营业部", address: "厦门市思明区吕岭路124-126号一层5单元" },
+            { id: 64, name: "兴业证券股份有限公司厦门建业路证券营业部", address: "厦门市思明区建业路3号吉祥家园3楼3" },
+            { id: 65, name: "兴业证券股份有限公司厦门杏林湾路证券营业部", address: "厦门市集美区杏林湾路492号第30层3007单元" },
+            { id: 66, name: "兴业证券股份有限公司厦门海沧大道证券营业部", address: "厦门市海沧区海沧大道893号泰地海西中心B座18层02单元" },
+            { id: 67, name: "兴业证券股份有限公司厦门湖里大道证券营业部", address: "厦门片区湖里大道22号301单元" },
+            { id: 68, name: "兴业证券股份有限公司厦门穆厝路证券营业部", address: "厦门市湖里区穆厝路9号113114单元" },
+            { id: 69, name: "兴业证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道100号怡山商业中心厦门财富中心18层03" },
+            { id: 70, name: "华创证券有限责任公司厦门分公司", address: "厦门市思明区湖滨南路359号海晟国际大厦12021205B单" },
+            { id: 71, name: "华夏证券有限公司厦门业务部", address: "厦门市新华路47号" },
+            { id: 72, name: "华夏证券股份有限公司厦门同新路证券营业部", address: "厦门市同安区大同街道同新路47号工人文化宫二三楼" },
+            { id: 73, name: "华夏证券股份有限公司厦门大同路证券营业部", address: "厦门市大同路292-296号" },
+            { id: 74, name: "华安证券股份有限公司厦门钟林路证券营业部", address: "厦门市海沧区钟林路8号海投大厦7层A单元" },
+            { id: 75, name: "华安证券股份有限公司厦门高林中路证券营业部", address: "厦门市湖里区高林中路535号1602-1605" },
+            { id: 76, name: "华宝证券股份有限公司厦门吕岭路证券营业部", address: "厦门市思明区吕岭路1739号创想中心B座1" },
+            { id: 77, name: "华林证券股份有限公司厦门分公司", address: "厦门市思明区湖滨南路55号908单元" },
+            { id: 78, name: "华林证券股份有限公司厦门东港北路证券营业部", address: "厦门片区东港北路29号507单元" },
+            { id: 79, name: "华泰联合证券有限责任公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路90号立信广场18011808-1811" },
+            { id: 80, name: "华泰证券股份有限公司厦门厦禾路证券营业部", address: "厦门市思明区厦禾路668号海翼大厦B栋201202之一单元" },
+            { id: 81, name: "华泰证券股份有限公司福建分公司", address: "厦门市思明区展鸿路81号特房波特曼财富中心A栋10D10C单" },
+            { id: 82, name: "华源证券股份有限公司厦门分公司", address: "厦门片区东港北路29号402单元" },
+            { id: 83, name: "华福证券有限责任公司厦门分公司", address: "厦门市思明区湖滨北路78号兴业大厦8楼B单元" },
+            { id: 84, name: "华福证券有限责任公司厦门后滨路证券营业部", address: "厦门市思明区后滨路6-130单元" },
+            { id: 85, name: "华福证券有限责任公司厦门吕岭路证券营业部", address: "厦门市湖里区吕岭路21号一层东" },
+            { id: 86, name: "华福证券有限责任公司厦门嘉禾路证券营业部", address: "厦门市思明区嘉禾路297号之三214号215号场地中间部分" },
+            { id: 87, name: "华福证券有限责任公司厦门宝龙一城证券营业部", address: "厦门市思明区吕岭路1599号厦门宝龙一城1号楼S" },
+            { id: 88, name: "华福证券有限责任公司厦门杏林北路证券营业部", address: "厦门市集美区杏林北路2号二层202单元" },
+            { id: 89, name: "华福证券有限责任公司厦门湖滨北路证券营业部", address: "厦门市思明区湖滨北路78号兴业大厦" },
+            { id: 90, name: "华福证券有限责任公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路258号鸿翔大厦二楼A单元" },
+            { id: 91, name: "华福证券有限责任公司厦门观音山台东路证券营业部", address: "厦门市思明区台东路62号103单元" },
+            { id: 92, name: "华福证券有限责任公司厦门钟林路证券营业部", address: "厦门市海沧区钟林路8号海投大厦10层1007室" },
+            { id: 93, name: "华西证券股份有限公司厦门分公司", address: "厦门市思明区民族路50号厦门世纪中心6层01-02单元" },
+            { id: 94, name: "华金证券股份有限公司厦门海西金融广场证券营业部", address: "厦门市湖里区东黄路215号901单元" },
+            { id: 95, name: "华鑫证券有限责任公司厦门分公司", address: "厦门市思明区嘉义路5号嘉晟国际大厦2303单元" },
+            { id: 96, name: "华龙证券股份有限公司厦门展鸿路证券营业部", address: "厦门市思明区展鸿路81号特房波特曼财富中心A座11层A单元" },
+            { id: 97, name: "华龙证券股份有限公司福建分公司", address: "厦门市思明区厦禾路823号109-110号商铺" },
+            { id: 98, name: "厦门宏达证券事务所", address: "厦门市厦大经济学院A座四楼405406室" },
+            { id: 99, name: "厦门德源证券事务所", address: "厦门市鹭江道218号三楼" },
+            { id: 100, name: "厦门证券公司鹭江证券交易营业部", address: "厦门市鹭江道240号" },
+            { id: 101, name: "厦门证券有限公司厦门东明路证券营业部（迁往北京）", address: "厦门市东明路142号" },
+            { id: 102, name: "厦门证券有限公司厦门东明路证券营业部", address: "厦门市东明路112号" },
+            { id: 103, name: "厦门证券有限公司厦门湖滨西路证券营业部", address: "厦门市湖滨西路15号1-2楼" },
+            { id: 104, name: "厦门证券登记有限公司", address: "厦门市槟榔小区商业中心之三二层" },
+            { id: 105, name: "国信证券股份有限公司厦门湖滨北路证券营业部", address: "厦门市思明区湖滨北路海湾新城一期25号之20127号之201" },
+            { id: 106, name: "国信证券股份有限公司厦门金钟路证券营业部", address: "厦门市湖里区金钟路5号107-109" },
+            { id: 107, name: "国信证券股份有限公司福建分公司", address: "厦门市思明区鹭江道2号厦门第一广场30层01-09室" },
+            { id: 108, name: "国元证券股份有限公司厦门莲岳路证券营业部", address: "厦门市思明区莲岳路1号1004室之" },
+            { id: 109, name: "国元证券股份有限公司福建分公司", address: "厦门市海沧区钟林路12号海沧商务大厦十楼1002-1004单" },
+            { id: 110, name: "国投证券股份有限公司厦门民族路证券营业部", address: "厦门市思明区民族路50号世纪中心5楼01B-03A室" },
+            { id: 111, name: "国投证券股份有限公司厦门湖滨东路证券营业部", address: "厦门市思明区湖滨东路95号1401140214031404单" },
+            { id: 112, name: "国投证券股份有限公司福建分公司", address: "厦门片区东港北路29号2704270527062707部分单" },
+            { id: 113, name: "国新证券股份有限公司厦门民族路证券营业部", address: "厦门市思明区民族路50号世纪中心20楼2004单元" },
+            { id: 114, name: "国泰海通证券股份有限公司厦门分公司", address: "厦门市思明区民族路50号厦门世纪中心26层04-06单元" },
+            { id: 115, name: "国泰海通证券股份有限公司厦门国际金融中心证券营业部", address: "厦门市思明区莲前街道展鸿路82号厦门国际金融中心24层240" },
+            { id: 116, name: "国泰海通证券股份有限公司厦门展鸿路证券营业部", address: "厦门市思明区展鸿路82号国际金融中心大厦2604单元" },
+            { id: 117, name: "国泰海通证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道8号国际银行大厦7层DEFG单元" },
+            { id: 118, name: "国海证券股份有限公司厦门厦禾路证券营业部", address: "厦门市思明区厦禾路13号第二层0708单元" },
+            { id: 119, name: "国盛证券有限责任公司厦门莲花南路证券营业部", address: "厦门市思明区莲花南路6号北方大厦606单元" },
+            { id: 120, name: "国融证券股份有限公司厦门松岳路证券营业部", address: "厦门市思明区松岳路8号悦享中心B塔楼第10层0305单元" },
+            { id: 121, name: "国都证券股份有限公司厦门七星西路证券营业部", address: "厦门市思明区七星西路178号七星大厦第14层02单元" },
+            { id: 122, name: "国金证券股份有限公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路55号禹洲广场1002-1005单元" },
+            { id: 123, name: "大鹏证券有限责任公司厦门吕岭路证券营业部", address: "厦门市吕岭路长安大厦二三层" },
+            { id: 124, name: "大鹏证券有限责任公司厦门湖滨东路证券营业部", address: "厦门市湖滨东路150号" },
+            { id: 125, name: "大鹏证券有限责任公司厦门鹭江道证券营业部", address: "厦门市鹭江道海滨大厦二三四层" },
+            { id: 126, name: "天元证券经纪有限公司厦门吕岭路证券营业部", address: "厦门市湖里区吕岭路75-77号长安大厦二三层" },
+            { id: 127, name: "天同证券有限责任公司厦门厦禾路证券营业部", address: "厦门市厦禾路837号二楼15-18单元" },
+            { id: 128, name: "天同证券有限责任公司厦门松柏路证券营业部马巷服务部", address: "厦门市同安区马巷供销社商场B幢二楼" },
+            { id: 129, name: "天同证券有限责任公司厦门松柏路证券营业部", address: "厦门市开元区松柏路1号" },
+            { id: 130, name: "天同证券有限责任公司厦门蜂巢山路证券营业部", address: "厦门市蜂巢山路1号" },
+            { id: 131, name: "太平洋证券股份有限公司厦门分公司", address: "厦门市思明区深田路46号深田国际大厦1404单元" },
+            { id: 132, name: "太平洋证券股份有限公司厦门厦禾路证券营业部", address: "厦门市思明区厦禾路1032号B幢1701单元" },
+            { id: 133, name: "太平洋证券股份有限公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路55号706单元" },
+            { id: 134, name: "太平洋证券股份有限公司厦门高林中路证券营业部", address: "厦门市湖里区高林中路535号1201-1202A" },
+            { id: 135, name: "山西证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道2号16层030405A室" },
+            { id: 136, name: "平安证券股份有限公司厦门国际金融中心证券营业部", address: "厦门市思明区展鸿路82号厦门国际金融中心38层3804-38" },
+            { id: 137, name: "平安证券股份有限公司厦门金湖路证券营业部", address: "厦门市湖里区金湖路518号汇盈大厦11楼1107单元" },
+            { id: 138, name: "广发证券股份有限公司厦门东黄路证券营业部", address: "厦门市湖里区东黄路215号1807室1" },
+            { id: 139, name: "广发证券股份有限公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路366号轻工大厦3层02单元" },
+            { id: 140, name: "广发证券股份有限公司厦门环岛东路证券营业部", address: "厦门市思明区环岛东路1811号中航紫金广场紫金塔31层01单" },
+            { id: 141, name: "广州证券股份有限公司厦门分公司", address: "厦门市思明区鹭江道100号怡山商业中心厦门财富中心01层03" },
+            { id: 142, name: "开源证券股份有限公司厦门七星西路证券营业部", address: "厦门市思明区七星西路178号第四层05单元" },
+            { id: 143, name: "开源证券股份有限公司福建分公司", address: "厦门市思明区七星西路178号第四层05单元" },
+            { id: 144, name: "招商证券股份有限公司厦门湖滨东路证券营业部", address: "厦门市思明区湖滨东路309号宏泰中心19层A" },
+            { id: 145, name: "新疆证券有限责任公司厦门厦禾路证券营业部", address: "厦门市开元区厦禾路820号帝豪大厦" },
+            { id: 146, name: "方正证券股份有限公司厦门分公司", address: "厦门市思明区湖滨南路357-359号海晟国际大厦第9层903" },
+            { id: 147, name: "方正证券股份有限公司厦门分公司", address: "厦门市思明区湖滨南路357-359号海晟国际大厦第9层904" },
+            { id: 148, name: "杭州三元证券投资顾问有限公司厦门分公司", address: "厦门市湖里海天路122号1C单元" },
+            { id: 149, name: "民生证券股份有限公司厦门分公司", address: "厦门市思明区鹭江道8号国际银行大厦30层CD单元" },
+            { id: 150, name: "江海证券有限公司厦门吕岭路证券营业部", address: "厦门市湖里区吕岭路7577号长安大厦三层" },
+            { id: 151, name: "浙商证券股份有限公司厦门分公司", address: "厦门市思明区展鸿路81号特房波特曼财富中心A座30楼E单元" },
+            { id: 152, name: "浙商证券股份有限公司厦门杏林东路证券营业部", address: "厦门市集美区宁海六里3号117-118单元" },
+            { id: 153, name: "海通证券股份有限公司厦门分公司", address: "厦门市思明区民族路50号世纪中心写字楼26楼01-03单元" },
+            { id: 154, name: "渤海证券股份有限公司厦门分公司", address: "厦门市思明区鹭江道52号之一海滨大厦第20层B单元" },
+            { id: 155, name: "湘财证券股份有限公司厦门七星西路证券营业部", address: "厦门市思明区七星西路178号第八层02单元" },
+            { id: 156, name: "爱建证券有限责任公司厦门湖滨一里证券营业部", address: "厦门市思明区湖滨一里闽南大厦裙楼二层" },
+            { id: 157, name: "申万宏源证券有限公司厦门分公司", address: "厦门市思明区厦禾路842号金榜大厦Ａ座1" },
+            { id: 158, name: "申万宏源证券有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道100号第十九层02-04单元" },
+            { id: 159, name: "福建兴业证券公司湖里证券交易营业部", address: "厦门市湖里兴隆路信宏大厦" },
+            { id: 160, name: "福建省华福证券公司厦门湖滨南路证券营业部灌口证券服务部", address: "厦门市灌口镇凤泉大厦" },
+            { id: 161, name: "第一创业证券股份有限公司厦门分公司", address: "厦门市思明区湖滨中路123号夏商大厦1201单元" },
+            { id: 162, name: "粤开证券股份有限公司福建分公司", address: "厦门市思明区七星西路178号七星大厦23层0305单元" },
+            { id: 163, name: "红塔证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道100号财富中心08层09单元" },
+            { id: 164, name: "联储证券股份有限公司厦门分公司", address: "厦门市思明区湖滨南路357-359号海晟国际大厦第7层703" },
+            { id: 165, name: "西部证券股份有限公司厦门桃园路证券营业部", address: "厦门市思明区桃园路16号14021403室" },
+            { id: 166, name: "财信证券股份有限公司厦门城南路证券营业部", address: "厦门市同安区城南路251号701室7" },
+            { id: 167, name: "财通证券股份有限公司厦门分公司", address: "厦门市思明区展鸿路82号8层02单元" },
+            { id: 168, name: "财通证券股份有限公司厦门厦禾路证券营业部", address: "厦门市思明区厦禾路189号银行中心320532063207单" },
+            { id: 169, name: "金圆统一证券有限公司", address: "厦门片区象屿路93号厦门国际航运中心C栋4层431单元" },
+            { id: 170, name: "金圆统一证券有限公司厦门分公司", address: "厦门市思明区展鸿路82号10层02-03单元" },
+            { id: 171, name: "银泰证券有限责任公司厦门环岛东路证券营业部", address: "厦门市思明区环岛东路1801号1301-1单元" },
+            { id: 172, name: "长城国瑞证券有限公司", address: "厦门市思明区台北路1号海西金谷广场T2办公楼13-14层" },
+            { id: 173, name: "长城国瑞证券有限公司厦门仙岳路证券营业部", address: "厦门市思明区仙岳路458号邮政大楼六" },
+            { id: 174, name: "长城国瑞证券有限公司厦门南山路证券营业部", address: "厦门市湖里区南山路466号三楼西侧室" },
+            { id: 175, name: "长城国瑞证券有限公司厦门厦禾路证券营业部", address: "厦门市思明区厦禾路1034号1801室" },
+            { id: 176, name: "长城国瑞证券有限公司厦门后江埭路证券营业部", address: "厦门市思明区后江埭路46号嘉成花园A幢1层01单元" },
+            { id: 177, name: "长城国瑞证券有限公司厦门沧虹路证券营业部", address: "厦门市海沧区沧虹路172号203单元" },
+            { id: 178, name: "长城国瑞证券有限公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路299-309号闽南大厦七层010203" },
+            { id: 179, name: "长城国瑞证券有限公司厦门环城西路证券营业部", address: "厦门市同安区环城西路983号1号店面985号13号店面987" },
+            { id: 180, name: "长城国瑞证券有限公司厦门莲前东路证券营业部", address: "厦门市思明区莲前东路381-407三层" },
+            { id: 181, name: "长城国瑞证券有限公司厦门观日路证券营业部", address: "厦门市思明区软件园观日路50号103单元" },
+            { id: 182, name: "长城证券股份有限公司厦门湖滨南路证券营业部", address: "厦门市思明区湖滨南路609号02单元" },
+            { id: 183, name: "长江证券股份有限公司厦门分公司", address: "厦门市思明区鹭江道52号海滨大厦十二楼BC单元" },
+            { id: 184, name: "长江证券股份有限公司厦门厦禾路证券营业部", address: "厦门市思明区厦禾路823号103-1单元" },
+            { id: 185, name: "长江证券股份有限公司厦门湖滨北路证券营业部", address: "厦门市思明区湖滨北路183号之九号商铺" },
+            { id: 186, name: "长江证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道52号海滨大厦12层AD单元" },
+            { id: 187, name: "首创证券股份有限公司厦门鹭江道证券营业部", address: "厦门市思明区鹭江道100号3101单元" },
+            { id: 188, name: "麦高证券有限责任公司厦门观音山证券营业部", address: "厦门市思明区观音山花莲路11号鸿星尔克集团大厦写字楼11楼C" }
+        ];
+
+        // 初始化数据
+        function initData() {
+            // 从localStorage加载数据，如果不存在则初始化
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            const companyStatus = JSON.parse(localStorage.getItem('companyStatus')) || {};
+            
+            // 初始化所有公司状态为未开始
+            companies.forEach(company => {
+                if (!companyStatus[company.id]) {
+                    companyStatus[company.id] = 'not-started';
+                }
+            });
+            
+            // 保存初始化数据
+            localStorage.setItem('activities', JSON.stringify(activities));
+            localStorage.setItem('companyStatus', JSON.stringify(companyStatus));
+            
+            return { activities, companyStatus };
+        }
+
+        // 渲染公司列表 - 一次性加载全部数据
+        function renderCompanyList(companies, searchTerm = '') {
+            const tableBody = document.getElementById('companyTableBody');
+            const filteredCompanies = companies.filter(company => 
+                company.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            tableBody.innerHTML = '';
+            
+            filteredCompanies.forEach(company => {
+                const status = getCompanyStatus(company.id);
+                const statusClass = getStatusClass(status);
+                const statusText = getStatusText(status);
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${company.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${company.name}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${company.address}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCompanyDetails(${company.id})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-green-600 hover:text-green-900" onclick="addActivityForCompany(${company.id})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 获取公司状态
+        function getCompanyStatus(companyId) {
+            const companyStatus = JSON.parse(localStorage.getItem('companyStatus')) || {};
+            return companyStatus[companyId] || 'not-started';
+        }
+
+        // 设置公司状态
+        function setCompanyStatus(companyId, status) {
+            const companyStatus = JSON.parse(localStorage.getItem('companyStatus')) || {};
+            companyStatus[companyId] = status;
+            localStorage.setItem('companyStatus', JSON.stringify(companyStatus));
+        }
+
+        // 获取状态样式类
+        function getStatusClass(status) {
+            switch(status) {
+                case 'not-started': return 'status-not-started';
+                case 'in-progress': return 'status-in-progress';
+                case 'completed': return 'status-completed';
+                case 'follow-up': return 'status-follow-up';
+                default: return 'status-not-started';
+            }
+        }
+
+        // 获取状态文本
+        function getStatusText(status) {
+            switch(status) {
+                case 'not-started': return '未开始';
+                case 'in-progress': return '进行中';
+                case 'completed': return '已完成';
+                case 'follow-up': return '需跟进';
+                default: return '未开始';
+            }
+        }
+
+        // 渲染公司选择下拉框
+        function renderCompanySelect() {
+            const selectElement = document.getElementById('companyName');
+            
+            selectElement.innerHTML = '<option value="" disabled selected>请选择公司</option>';
+            
+            companies.forEach(company => {
+                const option = document.createElement('option');
+                option.value = company.id;
+                option.textContent = company.name;
+                selectElement.appendChild(option);
+            });
+        }
+
+        // 查看公司详情
+        function viewCompanyDetails(companyId) {
+            const company = companies.find(c => c.id === companyId);
+            if (company) {
+                alert(`公司名称: ${company.name}\n地址: ${company.address}\n状态: ${getStatusText(getCompanyStatus(companyId))}`);
+            }
+        }
+
+        // 为特定公司添加活动记录
+        function addActivityForCompany(companyId) {
+            document.getElementById('companyName').value = companyId;
+            document.getElementById('add-activity').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 处理表单提交
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const memberName = document.getElementById('memberName').value;
+            const activityDate = document.getElementById('activityDate').value;
+            const companyId = parseInt(document.getElementById('companyName').value);
+            const activityContent = document.getElementById('activityContent').value;
+            const followUpStatus = document.getElementById('followUpStatus').value;
+            
+            // 验证表单
+            if (!memberName || !activityDate || !companyId || !activityContent) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            // 获取现有活动记录
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            
+            // 创建新活动记录
+            const newActivity = {
+                id: Date.now(), // 使用时间戳作为唯一ID
+                memberName,
+                date: activityDate,
+                companyId,
+                content: activityContent,
+                status: followUpStatus
+            };
+            
+            // 添加新记录并保存
+            activities.push(newActivity);
+            localStorage.setItem('activities', JSON.stringify(activities));
+            
+            // 更新公司状态
+            setCompanyStatus(companyId, followUpStatus);
+            
+            // 重置表单
+            document.getElementById('activityForm').reset();
+            
+            // 重新渲染数据
+            renderDashboard();
+            renderCompanyList(companies);
+            
+            // 显示成功消息
+            alert('记录添加成功！');
+        }
+
+        // 渲染数据概览
+        function renderDashboard() {
+            const companyStatus = JSON.parse(localStorage.getItem('companyStatus')) || {};
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            
+            // 计算各状态公司数量
+            const statusCounts = {
+                'not-started': 0,
+                'in-progress': 0,
+                'completed': 0,
+                'follow-up': 0
+            };
+            
+            Object.values(companyStatus).forEach(status => {
+                if (statusCounts.hasOwnProperty(status)) {
+                    statusCounts[status]++;
+                }
+            });
+            
+            // 更新状态卡片
+            document.getElementById('completedCount').textContent = statusCounts.completed;
+            document.getElementById('inProgressCount').textContent = statusCounts['in-progress'] + statusCounts['follow-up'];
+            
+            // 获取所有团队成员（去重）
+            const teamMembers = [...new Set(activities.map(a => a.memberName))];
+            document.getElementById('teamMemberCount').textContent = teamMembers.length;
+        }
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化数据
+            initData();
+            
+            // 渲染公司列表
+            renderCompanyList(companies);
+            
+            // 渲染公司选择下拉框
+            renderCompanySelect();
+            
+            // 渲染数据概览
+            renderDashboard();
+            
+            // 绑定搜索事件
+            document.getElementById('companySearch').addEventListener('input', function(e) {
+                renderCompanyList(companies, e.target.value);
+            });
+            
+            // 绑定表单提交事件
+            document.getElementById('activityForm').addEventListener('submit', handleFormSubmit);
+            
+            // 移动端菜单切换
+            const menuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            menuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // 点击页面其他区域关闭移动端菜单
+            document.addEventListener('click', function(event) {
+                if (!menuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+            
+            // 设置当前日期为默认日期
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('activityDate').value = today;
+        });
+    </script>
+</body>
+</html>
